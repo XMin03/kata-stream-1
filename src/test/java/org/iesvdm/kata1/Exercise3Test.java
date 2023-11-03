@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 
 public class Exercise3Test extends PetDomainForKata
@@ -16,7 +20,11 @@ public class Exercise3Test extends PetDomainForKata
     {
         //TODO
         // Obtain petTypes from people
-        List<PetType> petTypes = new ArrayList<>();
+        List<PetType> petTypes = people.stream()
+                .map(Person::getPetTypes)
+                .map(Map::keySet)
+                .flatMap(Collection::stream)
+                .toList();
 
         // Do you recognize this pattern? Can you simplify it using Java Streams?
         Map<String, Long> petEmojiCounts = new HashMap<>();
@@ -37,6 +45,7 @@ public class Exercise3Test extends PetDomainForKata
         //TODO
         // Replace by a stream the previous pattern
         Map<String, Long> petEmojiCounts2 = new HashMap<>();
+        petEmojiCounts2=petTypes.stream().collect( groupingBy(PetType::toString, counting()));
         Assertions.assertEquals(expectedMap, petEmojiCounts2);
 
     }
@@ -64,7 +73,7 @@ public class Exercise3Test extends PetDomainForKata
 
         //TODO
         // Replace by stream the previous pattern
-        Map<String, List<Person>> lastNamesToPeople2 = new HashMap<>();
+        Map<String, List<Person>> lastNamesToPeople2 = people.stream().collect(groupingBy(Person::getLastName));
         Assertions.assertEquals(3, lastNamesToPeople2.get("Smith").size());
     }
 
