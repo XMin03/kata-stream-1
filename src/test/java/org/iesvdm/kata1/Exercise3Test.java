@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.*;
 
 
 public class Exercise3Test extends PetDomainForKata
@@ -21,9 +20,9 @@ public class Exercise3Test extends PetDomainForKata
         //TODO
         // Obtain petTypes from people
         List<PetType> petTypes = people.stream()
-                .map(Person::getPetTypes)
-                .map(Map::keySet)
+                .map(Person::getPets)
                 .flatMap(Collection::stream)
+                .map(Pet::getType)
                 .toList();
 
         // Do you recognize this pattern? Can you simplify it using Java Streams?
@@ -108,8 +107,15 @@ public class Exercise3Test extends PetDomainForKata
 
         //TODO
         // Replace by stream
-        Map<PetType, Set<Person>> peopleByPetType2 = new HashMap<>();
-
+        Map<PetType, Set<Person>> peopleByPetType2 = this.people.stream()
+                //obtener todas las parejas de persona y animal
+                .flatMap( p -> p.getPets().stream().map(pet -> new Object[] {p, pet})
+                )
+                //el segundo paramatro no sé que es no puedo explicar.
+                .collect( groupingBy( ao -> ((Pet)ao[1]).getType(),
+                                mapping( ao -> ((Person)ao[0]), Collectors.toSet() )
+                        )
+                );
         Assertions.assertEquals(2, peopleByPetType2.get(PetType.CAT).size());
         Assertions.assertEquals(2, peopleByPetType2.get(PetType.DOG).size());
         Assertions.assertEquals(1, peopleByPetType2.get(PetType.HAMSTER).size());
@@ -124,7 +130,13 @@ public class Exercise3Test extends PetDomainForKata
     {
         //TODO
         // Replace by stream
-        Map<String, Set<Person>> petTypesToPeople = new HashMap<>();
+        Map<String, Set<Person>> petTypesToPeople = this.people.stream()
+                .flatMap( p -> p.getPets().stream().map(pet -> new Object[] {p, pet})
+                )
+                .collect( groupingBy( ao -> ((Pet)ao[1]).getType().toString(),
+                                mapping( ao -> ((Person)ao[0]), Collectors.toSet() )
+                        )
+                );
 
         Assertions.assertEquals(2, petTypesToPeople.get("🐱").size());
         Assertions.assertEquals(2, petTypesToPeople.get("🐶").size());
